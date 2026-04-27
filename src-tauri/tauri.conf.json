@@ -65,11 +65,11 @@
     "windows": [
       {
         "title": "KILL_SWITCH — Productivity System",
-        "width": 1100,
-        "height": 780,
-        "minWidth": 800,
+        "width": 480,
+        "height": 680,
+        "minWidth": 400,
         "minHeight": 600,
-        "resizable": true,
+        "resizable": false,
         "fullscreen": false,
         "decorations": true,
         "transparent": false,
