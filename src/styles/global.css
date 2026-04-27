@@ -76,7 +76,7 @@ html, body {
   border: 2px solid var(--panel-border);
   border-radius: 12px;
   position: relative;
-  padding: 20px;
+  padding: 16px 12px;
 }
 
 /* Corner screws */
