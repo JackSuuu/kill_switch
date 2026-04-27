@@ -108,9 +108,13 @@
   flex: 1;
 }
 
-.app-main--solo,
+.app-main--solo {
+  width: 100%;
+}
+
 .app-main--logs {
   width: 100%;
+  overflow-y: auto;
 }
 
 .col-timer {

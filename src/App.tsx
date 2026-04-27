@@ -4,7 +4,6 @@ import './styles/layout.css';
 import PomodoroTimer from './components/PomodoroTimer';
 import CountUpTimer from './components/CountUpTimer';
 import QuoteTicker from './components/QuoteTicker';
-import RobotMascot from './components/RobotMascot';
 import HistoryPanel from './components/HistoryPanel';
 import {
   loadStorage,
@@ -87,17 +86,10 @@ function App() {
       {/* ── LOGS tab ── */}
       {tab === 'logs' && (
         <main className="app-main app-main--logs">
+          <QuoteTicker />
           <aside className="col-aside col-aside--full">
-            <div className="pip-panel mascot-wrapper">
-              <span className="screw-bl">✦</span>
-              <span className="screw-br">✦</span>
-              <RobotMascot mood="idle" />
-            </div>
             <HistoryPanel storage={storage} onClear={handleClearHistory} />
           </aside>
-          <footer className="logs-quote">
-            <QuoteTicker />
-          </footer>
         </main>
       )}
     </div>
