@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import './styles/global.css';
 import './styles/layout.css';
 import PomodoroTimer from './components/PomodoroTimer';
@@ -70,9 +70,6 @@ function App() {
             </button>
           </div>
         </div>
-        <div className="header-right">
-          <LiveClock />
-        </div>
       </header>
 
       {/* ── MAIN: timer tabs (full width, both kept mounted) ── */}
@@ -106,22 +103,6 @@ function App() {
         </main>
       )}
     </div>
-  );
-}
-
-function LiveClock() {
-  const [time, setTime] = React.useState(() => new Date());
-  React.useEffect(() => {
-    const id = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(id);
-  }, []);
-  const hh = String(time.getHours()).padStart(2, '0');
-  const mm = String(time.getMinutes()).padStart(2, '0');
-  const ss = String(time.getSeconds()).padStart(2, '0');
-  return (
-    <span className="seg-display glow-green" style={{ fontSize: '30px' }}>
-      {hh}:{mm}:{ss}
-    </span>
   );
 }
 
