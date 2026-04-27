@@ -394,6 +394,22 @@
   flex-direction: column;
   gap: 10px;
   min-height: 120px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.quote-text {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.7;
+  min-height: 44px;
+  border: none;
+  padding: 0;
+  font-style: normal;
+  letter-spacing: 0.02em;
+  word-break: break-word;
+  white-space: pre-wrap;
 }
 
 .quote-label {
