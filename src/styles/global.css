@@ -1,0 +1,192 @@
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bungee&family=VT323&display=swap');
+
+/* ─── DESIGN TOKENS ──────────────────────────────────────────── */
+:root {
+  --bg:          #0d0f0b;
+  --panel:       #141a10;
+  --panel-border:#2a3824;
+  --green:       #7fff5f;
+  --green-dim:   #4ab83a;
+  --green-dark:  #1e3b18;
+  --amber:       #ffb830;
+  --red:         #ff3c3c;
+  --red-dim:     #8b1a1a;
+  --cream:       #e8e0c8;
+  --screw:       #3a4a30;
+  --glow-green:  0 0 6px #7fff5f88, 0 0 18px #7fff5f44;
+  --glow-amber:  0 0 6px #ffb83088, 0 0 18px #ffb83044;
+  --glow-red:    0 0 6px #ff3c3c88, 0 0 18px #ff3c3c44;
+  --font-mono:   'Share Tech Mono', monospace;
+  --font-display:'VT323', monospace;
+  --font-title:  'Bungee', sans-serif;
+  --scanline-opacity: 0.07;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  color: var(--green);
+  font-family: var(--font-mono);
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  position: relative;
+}
+
+/* ─── CRT OVERLAY ────────────────────────────────────────────── */
+#root::before {
+  content: '';
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,var(--scanline-opacity)) 2px,
+    rgba(0,0,0,var(--scanline-opacity)) 4px
+  );
+}
+
+#root::after {
+  content: '';
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: radial-gradient(ellipse at center,
+    transparent 60%,
+    rgba(0,0,0,0.55) 100%
+  );
+}
+
+/* ─── SCROLLBAR ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--panel); }
+::-webkit-scrollbar-thumb { background: var(--green-dim); border-radius: 3px; }
+
+/* ─── PANEL / CARD ───────────────────────────────────────────── */
+.pip-panel {
+  background: var(--panel);
+  border: 2px solid var(--panel-border);
+  border-radius: 12px;
+  position: relative;
+  padding: 20px;
+}
+
+/* Corner screws */
+.pip-panel::before,
+.pip-panel::after {
+  content: '✦';
+  position: absolute;
+  font-size: 8px;
+  color: var(--screw);
+  line-height: 1;
+}
+.pip-panel::before { top: 8px; left: 8px; }
+.pip-panel::after  { top: 8px; right: 8px; }
+
+.pip-panel .screw-bl,
+.pip-panel .screw-br {
+  position: absolute;
+  font-size: 8px;
+  color: var(--screw);
+  line-height: 1;
+}
+.pip-panel .screw-bl { bottom: 8px; left: 8px; }
+.pip-panel .screw-br { bottom: 8px; right: 8px; }
+
+/* ─── GLOW TEXT ──────────────────────────────────────────────── */
+.glow-green { text-shadow: var(--glow-green); }
+.glow-amber { color: var(--amber); text-shadow: var(--glow-amber); }
+.glow-red   { color: var(--red);   text-shadow: var(--glow-red);   }
+
+/* ─── BUTTON ─────────────────────────────────────────────────── */
+.pip-btn {
+  background: var(--green-dark);
+  border: 2px solid var(--green-dim);
+  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  padding: 8px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: background 0.15s, box-shadow 0.15s, color 0.15s;
+  user-select: none;
+}
+.pip-btn:hover {
+  background: var(--green-dim);
+  color: var(--bg);
+  box-shadow: var(--glow-green);
+}
+.pip-btn:active { transform: scale(0.97); }
+.pip-btn.danger {
+  border-color: var(--red-dim);
+  color: var(--red);
+}
+.pip-btn.danger:hover {
+  background: var(--red-dim);
+  color: var(--cream);
+  box-shadow: var(--glow-red);
+}
+.pip-btn.amber {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+.pip-btn.amber:hover {
+  background: var(--amber);
+  color: var(--bg);
+  box-shadow: var(--glow-amber);
+}
+
+/* ─── SEGMENT DISPLAY ────────────────────────────────────────── */
+.seg-display {
+  font-family: var(--font-display);
+  font-size: clamp(56px, 8vw, 88px);
+  color: var(--green);
+  text-shadow: var(--glow-green);
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+.seg-display.amber {
+  color: var(--amber);
+  text-shadow: var(--glow-amber);
+}
+.seg-display.red {
+  color: var(--red);
+  text-shadow: var(--glow-red);
+}
+
+/* ─── ANIMATIONS ─────────────────────────────────────────────── */
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+@keyframes ticker-scroll {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(-100%); }
+}
+@keyframes typewriter {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+@keyframes scanline-flicker {
+  0%   { --scanline-opacity: 0.07; }
+  50%  { --scanline-opacity: 0.10; }
+  100% { --scanline-opacity: 0.07; }
+}

@@ -1,0 +1,31 @@
+[package]
+name = "kill_switch"
+version = "0.1.0"
+description = "KILL_SWITCH Productivity System"
+authors = ["jacksu"]
+license = ""
+repository = ""
+default-run = "kill_switch"
+edition = "2021"
+rust-version = "1.60"
+
+[build-dependencies]
+tauri-build = { version = "1.5", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+tauri = { version = "1.8", features = [
+  "system-tray",
+  "notification-all",
+  "window-show",
+  "window-hide",
+  "window-set-title",
+  "window-center",
+  "window-set-focus",
+  "window-set-position",
+  "window-set-size",
+] }
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]
