@@ -13,7 +13,7 @@ import {
   type AppStorage,
 } from './hooks/useStorage';
 
-type Tab = 'pomodoro' | 'chrono';
+type Tab = 'pomodoro' | 'chrono' | 'logs';
 
 function App() {
   const [tab, setTab] = useState<Tab>('pomodoro');
@@ -35,6 +35,8 @@ function App() {
     saveStorage(cleared);
     setStorage(cleared);
   };
+
+  const isTimer = tab === 'pomodoro' || tab === 'chrono';
 
   return (
     <div className="app-root">
@@ -60,6 +62,12 @@ function App() {
             >
               ▷ CHRONO
             </button>
+            <button
+              className={`tab-btn ${tab === 'logs' ? 'active' : ''}`}
+              onClick={() => setTab('logs')}
+            >
+              ≡ LOGS
+            </button>
           </div>
         </div>
         <div className="header-right">
@@ -67,32 +75,36 @@ function App() {
         </div>
       </header>
 
-      {/* ── MAIN GRID ── */}
-      <main className="app-main">
-        {/* Left column: timer */}
-        <section className="col-timer">
-          {tab === 'pomodoro' ? (
-            <PomodoroTimer storage={storage} onStorageUpdate={handleStorageUpdate} />
-          ) : (
-            <CountUpTimer storage={storage} onStorageUpdate={handleStorageUpdate} />
-          )}
-        </section>
+      {/* ── MAIN: timer tabs (full width, both kept mounted) ── */}
+      {isTimer && (
+        <main className="app-main app-main--solo">
+          <section className="col-timer">
+            <div style={{ display: tab === 'pomodoro' ? 'contents' : 'none' }}>
+              <PomodoroTimer storage={storage} onStorageUpdate={handleStorageUpdate} />
+            </div>
+            <div style={{ display: tab === 'chrono' ? 'contents' : 'none' }}>
+              <CountUpTimer storage={storage} onStorageUpdate={handleStorageUpdate} />
+            </div>
+          </section>
+        </main>
+      )}
 
-        {/* Right column: robot + history */}
-        <aside className="col-aside">
-          <div className="pip-panel mascot-wrapper">
-            <span className="screw-bl">✦</span>
-            <span className="screw-br">✦</span>
-            <RobotMascot mood="idle" />
-          </div>
-          <HistoryPanel storage={storage} onClear={handleClearHistory} />
-        </aside>
-      </main>
-
-      {/* ── BOTTOM QUOTE ── */}
-      <footer className="app-footer">
-        <QuoteTicker />
-      </footer>
+      {/* ── LOGS tab ── */}
+      {tab === 'logs' && (
+        <main className="app-main app-main--logs">
+          <aside className="col-aside col-aside--full">
+            <div className="pip-panel mascot-wrapper">
+              <span className="screw-bl">✦</span>
+              <span className="screw-br">✦</span>
+              <RobotMascot mood="idle" />
+            </div>
+            <HistoryPanel storage={storage} onClear={handleClearHistory} />
+          </aside>
+          <footer className="logs-quote">
+            <QuoteTicker />
+          </footer>
+        </main>
+      )}
     </div>
   );
 }
