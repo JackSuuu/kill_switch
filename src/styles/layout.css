@@ -491,15 +491,29 @@
   }
 }
 
-/* ─── POMODORO SETTINGS ──────────────────────────────────────── */
-.pomodoro-settings {
-  margin-top: 10px;
-  padding: 10px 14px;
-  border: 1px solid var(--green-dim);
-  background: rgba(127,255,95,0.04);
+/* ─── POMODORO SETTINGS MODAL ────────────────────────────────── */
+.settings-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.settings-modal {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
+  min-width: 280px;
+}
+
+.settings-modal-title {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-align: center;
 }
 
 .settings-row {

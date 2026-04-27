@@ -247,37 +247,41 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ storage, onStorageUpdate 
         )}
       </div>
 
-      {/* Inline settings editor — only when idle */}
+      {/* Floating settings modal */}
       {editingSettings && status === 'idle' && (
-        <div className="pomodoro-settings">
-          <div className="settings-row">
-            <label className="settings-label">FOCUS</label>
-            <input
-              className="settings-input"
-              type="number"
-              min={1}
-              max={99}
-              value={draftFocus}
-              onChange={e => setDraftFocus(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && applySettings()}
-            />
-            <span className="settings-unit">MIN</span>
+        <div className="settings-backdrop" onClick={() => setEditingSettings(false)}>
+          <div className="settings-modal pip-panel" onClick={e => e.stopPropagation()}>
+            <div className="settings-modal-title glow-green">⚙ CONFIGURE TIMER</div>
+            <div className="settings-row">
+              <label className="settings-label">FOCUS</label>
+              <input
+                className="settings-input"
+                type="number"
+                min={1}
+                max={99}
+                value={draftFocus}
+                onChange={e => setDraftFocus(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && applySettings()}
+                autoFocus
+              />
+              <span className="settings-unit">MIN</span>
 
-            <label className="settings-label" style={{ marginLeft: '1.2rem' }}>BREAK</label>
-            <input
-              className="settings-input"
-              type="number"
-              min={1}
-              max={99}
-              value={draftBreak}
-              onChange={e => setDraftBreak(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && applySettings()}
-            />
-            <span className="settings-unit">MIN</span>
-          </div>
-          <div className="settings-actions">
-            <button className="pip-btn" onClick={applySettings}>✓ APPLY</button>
-            <button className="pip-btn danger" onClick={() => setEditingSettings(false)}>✕ CANCEL</button>
+              <label className="settings-label" style={{ marginLeft: '1.2rem' }}>BREAK</label>
+              <input
+                className="settings-input"
+                type="number"
+                min={1}
+                max={99}
+                value={draftBreak}
+                onChange={e => setDraftBreak(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && applySettings()}
+              />
+              <span className="settings-unit">MIN</span>
+            </div>
+            <div className="settings-actions">
+              <button className="pip-btn" onClick={applySettings}>✓ APPLY</button>
+              <button className="pip-btn danger" onClick={() => setEditingSettings(false)}>✕ CANCEL</button>
+            </div>
           </div>
         </div>
       )}
