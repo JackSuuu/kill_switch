@@ -72,19 +72,17 @@ function App() {
         </div>
       </header>
 
-      {/* ── MAIN: timer tabs (full width, both kept mounted) ── */}
-      {isTimer && (
-        <main className="app-main app-main--solo">
-          <section className="col-timer">
-            <div style={{ display: tab === 'pomodoro' ? 'contents' : 'none' }}>
-              <PomodoroTimer storage={storage} onStorageUpdate={handleStorageUpdate} />
-            </div>
-            <div style={{ display: tab === 'chrono' ? 'contents' : 'none' }}>
-              <CountUpTimer storage={storage} onStorageUpdate={handleStorageUpdate} />
-            </div>
-          </section>
-        </main>
-      )}
+      {/* ── MAIN: timer tabs — always mounted, hidden when on LOGS ── */}
+      <main className="app-main app-main--solo" style={{ display: isTimer ? undefined : 'none' }}>
+        <section className="col-timer">
+          <div style={{ display: tab === 'pomodoro' ? 'contents' : 'none' }}>
+            <PomodoroTimer storage={storage} onStorageUpdate={handleStorageUpdate} />
+          </div>
+          <div style={{ display: tab === 'chrono' ? 'contents' : 'none' }}>
+            <CountUpTimer storage={storage} onStorageUpdate={handleStorageUpdate} />
+          </div>
+        </section>
+      </main>
 
       {/* ── LOGS tab ── */}
       {tab === 'logs' && (
