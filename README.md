@@ -5,6 +5,8 @@
 
 A retro-futuristic productivity timer for macOS. Built with Tauri + React, styled after the Pip-Boy aesthetic — dark terminals, green phosphor glow, analog dials, and atomic-age typography.
 
+![](sh_banner.png)
+
 ---
 
 ## Features
