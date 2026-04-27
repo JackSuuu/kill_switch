@@ -10,8 +10,24 @@ import {
 } from '../hooks/useStorage';
 import { tauriInvoke } from '../hooks/useTauri';
 
-const FOCUS_DURATION = 25 * 60;   // 25 minutes
-const BREAK_DURATION = 10 * 60;   // 10 minutes
+const SETTINGS_KEY = 'kill_switch_pomodoro_settings';
+
+interface PomodoroSettings {
+  focusMinutes: number;
+  breakMinutes: number;
+}
+
+function loadSettings(): PomodoroSettings {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (raw) return JSON.parse(raw) as PomodoroSettings;
+  } catch {}
+  return { focusMinutes: 25, breakMinutes: 10 };
+}
+
+function saveSettings(s: PomodoroSettings) {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+}
 
 interface PomodoroTimerProps {
   storage: AppStorage;
@@ -27,15 +43,36 @@ const PHASE_LABEL: Record<Phase, string> = {
 };
 
 const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ storage, onStorageUpdate }) => {
+  const [settings, setSettings] = useState<PomodoroSettings>(loadSettings);
+  const [editingSettings, setEditingSettings] = useState(false);
+  const [draftFocus, setDraftFocus] = useState(String(settings.focusMinutes));
+  const [draftBreak, setDraftBreak] = useState(String(settings.breakMinutes));
+
+  const focusDuration = settings.focusMinutes * 60;
+  const breakDuration = settings.breakMinutes * 60;
+
   const [phase, setPhase] = useState<Phase>('focus');
   const [status, setStatus] = useState<Status>('idle');
-  const [remaining, setRemaining] = useState(FOCUS_DURATION);
+  const [remaining, setRemaining] = useState(focusDuration);
   const [sessionCount, setSessionCount] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { beep, beepDone } = useBeep();
 
-  const total = phase === 'focus' ? FOCUS_DURATION : BREAK_DURATION;
+  const total = phase === 'focus' ? focusDuration : breakDuration;
   const progress = 1 - remaining / total;
+
+  // Apply new settings (only when idle)
+  const applySettings = () => {
+    const fm = Math.max(1, Math.min(99, parseInt(draftFocus) || 25));
+    const bm = Math.max(1, Math.min(99, parseInt(draftBreak) || 10));
+    const next: PomodoroSettings = { focusMinutes: fm, breakMinutes: bm };
+    setSettings(next);
+    saveSettings(next);
+    setDraftFocus(String(fm));
+    setDraftBreak(String(bm));
+    setRemaining(phase === 'focus' ? fm * 60 : bm * 60);
+    setEditingSettings(false);
+  };
 
   const clearTick = () => {
     if (intervalRef.current) {
@@ -76,7 +113,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ storage, onStorageUpdate 
     setTimeout(() => {
       const nextPhase: Phase = phase === 'focus' ? 'break' : 'focus';
       setPhase(nextPhase);
-      setRemaining(nextPhase === 'focus' ? FOCUS_DURATION : BREAK_DURATION);
+      setRemaining(nextPhase === 'focus' ? focusDuration : breakDuration);
       setStatus('idle');
     }, 2000);
   }, [phase, total, beepDone, onStorageUpdate]);
@@ -119,7 +156,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ storage, onStorageUpdate 
   const handleReset = () => {
     clearTick();
     setStatus('idle');
-    setRemaining(phase === 'focus' ? FOCUS_DURATION : BREAK_DURATION);
+    setRemaining(phase === 'focus' ? focusDuration : breakDuration);
     tauriInvoke('update_tray_title', { text: '☢' });
   };
 
@@ -127,7 +164,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ storage, onStorageUpdate 
     clearTick();
     const next: Phase = phase === 'focus' ? 'break' : 'focus';
     setPhase(next);
-    setRemaining(next === 'focus' ? FOCUS_DURATION : BREAK_DURATION);
+    setRemaining(next === 'focus' ? focusDuration : breakDuration);
     setStatus('idle');
     tauriInvoke('update_tray_title', { text: '☢' });
   };
@@ -198,7 +235,52 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ storage, onStorageUpdate 
         <button className="pip-btn" onClick={handleSkip} style={{ opacity: 0.7 }}>
           ⏭ SKIP
         </button>
+        {status === 'idle' && !editingSettings && (
+          <button
+            className="pip-btn"
+            onClick={() => { setDraftFocus(String(settings.focusMinutes)); setDraftBreak(String(settings.breakMinutes)); setEditingSettings(true); }}
+            style={{ opacity: 0.6 }}
+            title="Configure durations"
+          >
+            ⚙ SET
+          </button>
+        )}
       </div>
+
+      {/* Inline settings editor — only when idle */}
+      {editingSettings && status === 'idle' && (
+        <div className="pomodoro-settings">
+          <div className="settings-row">
+            <label className="settings-label">FOCUS</label>
+            <input
+              className="settings-input"
+              type="number"
+              min={1}
+              max={99}
+              value={draftFocus}
+              onChange={e => setDraftFocus(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && applySettings()}
+            />
+            <span className="settings-unit">MIN</span>
+
+            <label className="settings-label" style={{ marginLeft: '1.2rem' }}>BREAK</label>
+            <input
+              className="settings-input"
+              type="number"
+              min={1}
+              max={99}
+              value={draftBreak}
+              onChange={e => setDraftBreak(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && applySettings()}
+            />
+            <span className="settings-unit">MIN</span>
+          </div>
+          <div className="settings-actions">
+            <button className="pip-btn" onClick={applySettings}>✓ APPLY</button>
+            <button className="pip-btn danger" onClick={() => setEditingSettings(false)}>✕ CANCEL</button>
+          </div>
+        </div>
+      )}
 
       {/* Status message */}
       <div className="pomodoro-status">
@@ -212,7 +294,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ storage, onStorageUpdate 
             ⏸ PAUSED
           </span>
         )}
-        {status === 'idle' && (
+        {status === 'idle' && !editingSettings && (
           <span className="status-text" style={{ opacity: 0.4 }}>
             ○ STANDBY
           </span>

@@ -463,3 +463,57 @@
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+/* ─── POMODORO SETTINGS ──────────────────────────────────────── */
+.pomodoro-settings {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--green-dim);
+  background: rgba(127,255,95,0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.settings-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--green-dim);
+  letter-spacing: 0.1em;
+  min-width: 36px;
+}
+
+.settings-input {
+  width: 48px;
+  background: var(--bg-dark);
+  border: 1px solid var(--green-dim);
+  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  text-align: center;
+  padding: 3px 4px;
+  outline: none;
+  -moz-appearance: textfield;
+}
+.settings-input::-webkit-inner-spin-button,
+.settings-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.settings-input:focus { border-color: var(--green); box-shadow: 0 0 6px var(--green-glow); }
+
+.settings-unit {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--green-dim);
+  letter-spacing: 0.08em;
+}
+
+.settings-actions {
+  display: flex;
+  gap: 8px;
+}
