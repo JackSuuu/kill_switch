@@ -14,17 +14,9 @@ interface CountUpTimerProps {
   onStorageUpdate: (s: AppStorage) => void;
 }
 
-interface Lap {
-  index: number;
-  elapsed: number;
-  split: number;
-  timestamp: string;
-}
-
 const CountUpTimer: React.FC<CountUpTimerProps> = ({ storage, onStorageUpdate }) => {
   const [running, setRunning] = useState(false);
   const [elapsed, setElapsed] = useState(0);
-  const [laps, setLaps] = useState<Lap[]>([]);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { beep } = useBeep();
 
@@ -57,22 +49,6 @@ const CountUpTimer: React.FC<CountUpTimerProps> = ({ storage, onStorageUpdate })
     clearTick();
   };
 
-  const handleLap = () => {
-    if (!running && elapsed === 0) return;
-    beep(880, 0.08, 0.15);
-    const lastLap = laps[0];
-    const split = lastLap ? elapsed - lastLap.elapsed : elapsed;
-    setLaps(prev => [
-      {
-        index: prev.length + 1,
-        elapsed,
-        split,
-        timestamp: new Date().toLocaleTimeString(),
-      },
-      ...prev,
-    ]);
-  };
-
   const handleSave = () => {
     if (elapsed === 0) return;
     beep(880, 0.15, 0.25);
@@ -90,7 +66,6 @@ const CountUpTimer: React.FC<CountUpTimerProps> = ({ storage, onStorageUpdate })
     clearTick();
     setRunning(false);
     setElapsed(0);
-    setLaps([]);
   };
 
   const hours = Math.floor(elapsed / 3600);
@@ -144,43 +119,15 @@ const CountUpTimer: React.FC<CountUpTimerProps> = ({ storage, onStorageUpdate })
             ⏹ STOP
           </button>
         )}
-        <button className="pip-btn" onClick={handleLap} disabled={elapsed === 0}>
-          ◎ LAP
-        </button>
         {!running && elapsed > 0 && (
           <button className="pip-btn" onClick={handleSave}>
             ✦ SAVE
           </button>
         )}
-        <button className="pip-btn danger" onClick={handleReset} disabled={elapsed === 0 && laps.length === 0}>
+        <button className="pip-btn danger" onClick={handleReset} disabled={elapsed === 0}>
           ↺ RESET
         </button>
       </div>
-
-      {/* Lap list */}
-      {laps.length > 0 && (
-        <div className="lap-list">
-          <div className="lap-header">
-            <span>LAP</span>
-            <span>SPLIT</span>
-            <span>TOTAL</span>
-            <span>TIME</span>
-          </div>
-          {laps.slice(0, 5).map(lap => (
-            <div key={lap.index} className="lap-row">
-              <span className="glow-green">#{String(lap.index).padStart(2,'0')}</span>
-              <span>{formatHHMMSS(lap.split)}</span>
-              <span style={{ opacity: 0.7 }}>{formatHHMMSS(lap.elapsed)}</span>
-              <span style={{ opacity: 0.5, fontSize: '11px' }}>{lap.timestamp}</span>
-            </div>
-          ))}
-          {laps.length > 5 && (
-            <div style={{ textAlign: 'center', opacity: 0.4, fontSize: '11px', paddingTop: '4px' }}>
-              +{laps.length - 5} more laps
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 };

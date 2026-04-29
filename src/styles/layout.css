@@ -6,8 +6,7 @@
   overflow: hidden;
   gap: 12px;
   padding: 12px 0;
-  width: fit-content;
-  min-width: 0;
+  width: 440px;
   margin: 0 auto;
 }
 
