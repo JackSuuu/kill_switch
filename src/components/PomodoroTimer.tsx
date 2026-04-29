@@ -198,7 +198,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ storage, onStorageUpdate 
         <div className="dial-wrapper" style={{ position: 'relative', display: 'inline-block' }}>
           <AnalogDial
             progress={progress}
-            size={240}
+            size={200}
             color={dialColor}
             label={isDone ? '✓ DONE' : formatMMSS(remaining)}
             sublabel={phase === 'focus' ? 'FOCUS' : 'BREAK'}

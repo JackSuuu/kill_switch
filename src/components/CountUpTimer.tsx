@@ -90,7 +90,7 @@ const CountUpTimer: React.FC<CountUpTimerProps> = ({ storage, onStorageUpdate })
         <div style={{ position: 'relative', display: 'inline-block' }}>
           <AnalogDial
             progress={progress}
-            size={240}
+            size={200}
             color="green"
             label={`${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`}
             sublabel={hours > 0 ? `+${hours}H` : 'ELAPSED'}

@@ -4,9 +4,9 @@
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
-  gap: 12px;
-  padding: 12px 0;
-  width: 440px;
+  gap: 8px;
+  padding: 8px 0;
+  width: 500px;
   margin: 0 auto;
 }
 
@@ -16,7 +16,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 14px 22px;
+  padding: 10px 16px;
   flex-wrap: wrap;
 }
 
@@ -140,7 +140,7 @@
 .countup-panel {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
   height: 100%;
 }
 
