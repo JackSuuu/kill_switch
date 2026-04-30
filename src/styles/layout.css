@@ -129,6 +129,13 @@
 
 .col-aside--full {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.col-aside--full > * {
+  width: 100%;
 }
 
 .logs-quote {
@@ -142,6 +149,7 @@
   flex-direction: column;
   gap: 10px;
   height: 100%;
+  padding-bottom: 20px;
 }
 
 .pomodoro-header {
