@@ -8,7 +8,7 @@ use std::time::{Duration, Instant};
 
 use serde::{Deserialize, Serialize};
 use tauri::{
-    CustomMenuItem, Manager, PhysicalPosition, PhysicalSize, SystemTray,
+    CustomMenuItem, Manager, PhysicalPosition, SystemTray,
     SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem, Window,
 };
 use tauri::api::notification::Notification;
@@ -17,16 +17,13 @@ use tauri::api::notification::Notification;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct WindowGeometry {
-    x:      i32,
-    y:      i32,
-    width:  u32,
-    height: u32,
+    x: i32,
+    y: i32,
 }
 
 impl Default for WindowGeometry {
     fn default() -> Self {
-        // Matches tauri.conf.json defaults
-        Self { x: -1, y: -1, width: 1100, height: 780 }
+        Self { x: -1, y: -1 }
     }
 }
 
@@ -47,7 +44,6 @@ fn load_geometry(app: &tauri::AppHandle) -> WindowGeometry {
 
 fn save_geometry(app: &tauri::AppHandle, geo: &WindowGeometry) {
     let path = geometry_path(app);
-    // Ensure parent dir exists
     if let Some(parent) = path.parent() {
         let _ = fs::create_dir_all(parent);
     }
@@ -56,15 +52,41 @@ fn save_geometry(app: &tauri::AppHandle, geo: &WindowGeometry) {
     }
 }
 
-/// Apply saved geometry to the window on startup.
+/// Restore only position, clamped so the window stays fully on-screen.
 fn restore_geometry(win: &Window, geo: &WindowGeometry) {
-    // Only apply saved position if it looks sane (not the -1 sentinel)
-    if geo.x >= 0 && geo.y >= 0 {
-        let _ = win.set_position(PhysicalPosition::new(geo.x, geo.y));
-    } else {
+    if geo.x < 0 || geo.y < 0 {
         let _ = win.center();
+        return;
     }
-    let _ = win.set_size(PhysicalSize::new(geo.width, geo.height));
+
+    // Get current window size (set by tauri.conf.json, fixed)
+    let (win_w, win_h) = win.inner_size()
+        .map(|s| (s.width as i32, s.height as i32))
+        .unwrap_or((520, 680));
+
+    // Find the monitor that best contains the saved position
+    let monitors = win.available_monitors().unwrap_or_default();
+    let target_monitor = monitors.iter().find(|m| {
+        let p = m.position();
+        let s = m.size();
+        geo.x >= p.x && geo.x < p.x + s.width as i32
+            && geo.y >= p.y && geo.y < p.y + s.height as i32
+    });
+
+    match target_monitor {
+        Some(monitor) => {
+            let mp = monitor.position();
+            let ms = monitor.size();
+            // Clamp so the window is fully visible on this monitor
+            let x = geo.x.max(mp.x).min(mp.x + ms.width as i32 - win_w);
+            let y = geo.y.max(mp.y).min(mp.y + ms.height as i32 - win_h);
+            let _ = win.set_position(PhysicalPosition::new(x, y));
+        }
+        None => {
+            // Saved position is off all monitors — center instead
+            let _ = win.center();
+        }
+    }
 }
 
 // ─── Tauri Commands ───────────────────────────────────────────────────────────
@@ -160,84 +182,35 @@ fn main() {
         // ── Window events: persist geometry + hide-to-tray ────────────────
         .on_window_event(move |event| {
             match event.event() {
-                // ── Hide to tray on close ─────────────────────────────────
                 tauri::WindowEvent::CloseRequested { api, .. } => {
-                    // Save geometry one final time before hiding
-                    if let (Ok(size), Ok(pos)) = (
-                        event.window().inner_size(),
-                        event.window().outer_position(),
-                    ) {
-                        let geo = WindowGeometry {
-                            x:      pos.x,
-                            y:      pos.y,
-                            width:  size.width,
-                            height: size.height,
-                        };
+                    if let Ok(pos) = event.window().outer_position() {
+                        let geo = WindowGeometry { x: pos.x, y: pos.y };
                         save_geometry(&event.window().app_handle(), &geo);
                     }
                     event.window().hide().unwrap();
                     api.prevent_close();
                 }
 
-                // ── Track resize ──────────────────────────────────────────
-                tauri::WindowEvent::Resized(size) => {
-                    let win = event.window();
-                    if let Ok(pos) = win.outer_position() {
-                        let geo = WindowGeometry {
-                            x:      pos.x,
-                            y:      pos.y,
-                            width:  size.width,
-                            height: size.height,
-                        };
-                        let mut state = debounce.lock().unwrap();
-                        state.0 = Some(Instant::now());
-                        state.1 = geo;
-                        drop(state);
-
-                        // Spawn a short-lived thread to flush after 600ms quiet
-                        let debounce2 = Arc::clone(&debounce);
-                        let app_handle = win.app_handle();
-                        std::thread::spawn(move || {
-                            std::thread::sleep(Duration::from_millis(600));
-                            let mut state = debounce2.lock().unwrap();
-                            if let Some(t) = state.0 {
-                                if t.elapsed() >= Duration::from_millis(599) {
-                                    save_geometry(&app_handle, &state.1);
-                                    state.0 = None;
-                                }
-                            }
-                        });
-                    }
-                }
-
                 // ── Track move ────────────────────────────────────────────
                 tauri::WindowEvent::Moved(pos) => {
-                    let win = event.window();
-                    if let Ok(size) = win.inner_size() {
-                        let geo = WindowGeometry {
-                            x:      pos.x,
-                            y:      pos.y,
-                            width:  size.width,
-                            height: size.height,
-                        };
-                        let mut state = debounce.lock().unwrap();
-                        state.0 = Some(Instant::now());
-                        state.1 = geo;
-                        drop(state);
+                    let geo = WindowGeometry { x: pos.x, y: pos.y };
+                    let mut state = debounce.lock().unwrap();
+                    state.0 = Some(Instant::now());
+                    state.1 = geo;
+                    drop(state);
 
-                        let debounce2 = Arc::clone(&debounce);
-                        let app_handle = win.app_handle();
-                        std::thread::spawn(move || {
-                            std::thread::sleep(Duration::from_millis(600));
-                            let mut state = debounce2.lock().unwrap();
-                            if let Some(t) = state.0 {
-                                if t.elapsed() >= Duration::from_millis(599) {
-                                    save_geometry(&app_handle, &state.1);
-                                    state.0 = None;
-                                }
+                    let debounce2 = Arc::clone(&debounce);
+                    let app_handle = event.window().app_handle();
+                    std::thread::spawn(move || {
+                        std::thread::sleep(Duration::from_millis(600));
+                        let mut state = debounce2.lock().unwrap();
+                        if let Some(t) = state.0 {
+                            if t.elapsed() >= Duration::from_millis(599) {
+                                save_geometry(&app_handle, &state.1);
+                                state.0 = None;
                             }
-                        });
-                    }
+                        }
+                    });
                 }
 
                 _ => {}
